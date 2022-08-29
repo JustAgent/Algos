@@ -1,0 +1,208 @@
+class Node():
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+
+class AVLTree():
+    def __init__(self):
+        self.root = None
+        self.height = -1
+        self.balance = 0
+
+    def height(self):
+        if self.root is not None:
+            return self.root.height
+        else:
+            return 0
+
+    def is_leaf(self):
+        return self.height == 0
+
+    def insert(self, data):
+        new_node = Node(data)
+
+        if self.root is not None:
+            if data < self.root.data:
+                self.root.left.insert(data)
+            elif data > self.root.data:
+                self.root.right.insert(data)
+            else:
+                print("Node is alrady in AVL")
+                return
+        else:
+            self.root = new_node
+            self.root.left = AVLTree()
+            self.root.right = AVLTree()
+
+        self.rebalance()
+
+    def rebalance(self):
+
+        self.update_heights(False)
+        self.update_balances(False)
+
+        while self.balance < -1 or self.balance > 1:
+
+            if self.balance > 1:
+                if self.root.left.balance < 0:
+                    self.root.left.rotate_left()
+                    self.update_heights()
+                    self.update_balances()
+                self.rotate_right()
+                self.update_heights()
+                self.update_balances()
+
+            if self.balance < -1:
+                if self.root.right.balance > 0:
+                    self.root.right.rotate_right()
+                    self.update_heights()
+                    self.update_balances()
+                self.rotate_left()
+                self.update_heights()
+                self.update_balances()
+
+    def rotate_right(self):
+        print("Rotating ", self.root.data, " right")
+
+        a = self.root
+        b = self.root.left.root
+        c = b.right.root
+
+        self.root = b
+        b.right.root = a
+        a.left.root = c
+
+    def rotate_left(self):
+        print("Rotating ", self.root.data, " left")
+
+        a = self.root
+        b = self.root.right.root
+        c = b.left.root
+
+        self.root = b
+        b.left.root = a
+        a.right.root = c
+
+    def update_heights(self, recurse=True):
+        if not self.root is None:
+            if recurse:
+                if self.root.left is not None:
+                    self.root.left.update_heights()
+                if self.root.right is not None:
+                    self.root.right.update_heights()
+
+            self.height = max(self.root.left.height, self.root.right.height) + 1
+        else:
+            self.height = -1
+
+    def update_balances(self, recurse=True):
+        if not self.root is None:
+            if recurse:
+                if self.root.left is not None:
+                    self.root.left.update_balances()
+                if self.root.right is not None:
+                    self.root.right.update_balances()
+
+            self.balance = self.root.left.height - self.root.right.height
+        else:
+            self.balance = 0
+
+    def delete(self, data):
+        print("Trying to delete at root: ", self.root.data)
+
+        if self.root is not None:
+            if self.root.data == data:
+                print("deleting... ", data)
+
+                if self.root.left.root is None and self.root.right.root is None:
+                    self.root = None
+                elif self.root.left.root is None and self.root.right.root is not None:
+                    self.root = self.root.right.root
+                elif self.root.left.root is not None and self.root.right.root is None:
+                    self.root = self.root.left.root
+                else:
+                    replacement = self.logical_successor(self.root)
+                    if replacement is not None:
+                        print("Found replacement for ", data, " -> ", replacement.data)
+                        self.root.data = replacement.data
+                        self.root.right.delete(replacement.data)
+
+                self.rebalance()
+                return
+            elif data < self.root.data:
+                self.root.left.delete(data)
+            elif data > self.root.data:
+                self.root.right.delete(data)
+
+            self.rebalance()
+        else:
+            return
+
+    def logical_predecessor(self, root):
+        root = root.left.root
+
+        if root is not None:
+            while root.right is not None:
+                if root.right.root is None:
+                    return root
+                else:
+                    root = root.right.root
+
+        return root
+
+    def logical_successor(self, root):
+        root = root.right.root
+
+        if root is not None:
+            while root.left is not None:
+                if root.left.root is None:
+                    return root
+                else:
+                    root = root.left.root
+
+        return root
+
+    def check_balanced(self):
+        if self is None or self.root is None:
+            return True
+
+        self.update_heights()
+        self.update_balances()
+
+        return ((abs(self.balance) < 2) and self.root.left.check_balanced() and self.root.right.check_balanced())
+
+    def inorder_traverse(self):
+        if self.root == None:
+            return []
+
+        visited = []
+
+        left = self.root.left.inorder_traverse()
+        for node in left:
+            visited.append(node)
+
+        visited.append(self.root.data)
+
+        right = self.root.right.inorder_traverse()
+        for node in right:
+            visited.append(node)
+
+        return visited
+
+
+if __name__ == "__main__":
+    tree = AVLTree()
+
+    print("Inserting")
+    for i in [7, 5, 2, 6, 3, 4, 1, 8, 9, 0]:
+        tree.insert(i)
+
+    print(tree.inorder_traverse())
+
+    print("Deleting")
+    tree.delete(3)
+    tree.delete(4)
+    tree.delete(5)
+    print(tree.inorder_traverse())
