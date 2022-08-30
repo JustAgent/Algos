@@ -15,7 +15,7 @@ class BinarySearchTree:
     def check(self, root_node, min=-sys.maxsize, max=sys.maxsize):
         if root_node is not None:
             if root_node.data >= min and root_node.data <= max and self.check(root_node.left, min,
-                                                                                     root_node.data) and self.check(
+            root_node.data) and self.check(
                     root_node.right, root_node.data, max):
                 return "YES"
             else:

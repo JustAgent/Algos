@@ -17,9 +17,6 @@ class AVLTree():
         else:
             return 0
 
-    def is_leaf(self):
-        return self.height == 0
-
     def insert(self, data):
         new_node = Node(data)
 
@@ -110,11 +107,10 @@ class AVLTree():
             self.balance = 0
 
     def delete(self, data):
-        print("Trying to delete at root: ", self.root.data)
 
         if self.root is not None:
             if self.root.data == data:
-                print("deleting... ", data)
+                print("Deleting... ", data)
 
                 if self.root.left.root is None and self.root.right.root is None:
                     self.root = None
@@ -196,7 +192,7 @@ if __name__ == "__main__":
     tree = AVLTree()
 
     print("Inserting")
-    for i in [7, 5, 2, 6, 3, 4, 1, 8, 9, 0]:
+    for i in [7, 5, 2, 6, 3, 4, 1, 8, 9, 0, 1, 11, 2, 13]:
         tree.insert(i)
 
     print(tree.inorder_traverse())
