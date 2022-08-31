@@ -9,77 +9,77 @@ class TreeNode:
 
 class SplayTree:
     @staticmethod
-    def update(v):
-        if v is None:
+    def update(node):
+        if node is None:
             return
-        v.sum = v.key + (v.left.sum if v.left is not None else 0) + (
-            v.right.sum if v.right is not None else 0)
-        if v.left is not None:
-            v.left.parent = v
-        if v.right is not None:
-            v.right.parent = v
+        node.sum = node.key + (node.left.sum if node.left is not None else 0) + (
+            node.right.sum if node.right is not None else 0)
+        if node.left is not None:
+            node.left.parent = node
+        if node.right is not None:
+            node.right.parent = node
 
     @classmethod
-    def _small_rotation(cls, v):
-        parent = v.parent
+    def _small_rotation(cls, node):
+        parent = node.parent
         if parent is None:
             return
-        grandparent = v.parent.parent
-        if parent.left == v:
-            m = v.right
-            v.right = parent
+        grandparent = node.parent.parent
+        if parent.left == node:
+            m = node.right
+            node.right = parent
             parent.left = m
         else:
-            m = v.left
-            v.left = parent
+            m = node.left
+            node.left = parent
             parent.right = m
         cls.update(parent)
-        cls.update(v)
-        v.parent = grandparent
+        cls.update(node)
+        node.parent = grandparent
         if grandparent is not None:
             if grandparent.left == parent:
-                grandparent.left = v
+                grandparent.left = node
             else:
-                grandparent.right = v
+                grandparent.right = node
 
     @classmethod
-    def _big_rotation(cls, v):
-        if v.parent.left == v and v.parent.parent.left == v.parent:
-            cls._small_rotation(v.parent)
-            cls._small_rotation(v)
-        elif v.parent.right == v and v.parent.parent.right == v.parent:
-            cls._small_rotation(v.parent)
-            cls._small_rotation(v)
+    def _big_rotation(cls, node):
+        if node.parent.left == node and node.parent.parent.left == node.parent:
+            cls._small_rotation(node.parent)
+            cls._small_rotation(node)
+        elif node.parent.right == node and node.parent.parent.right == node.parent:
+            cls._small_rotation(node.parent)
+            cls._small_rotation(node)
         else:
-            cls._small_rotation(v)
-            cls._small_rotation(v)
+            cls._small_rotation(node)
+            cls._small_rotation(node)
 
     @classmethod
-    def splay(cls, v):
-        if v is None:
+    def splay(cls, node):
+        if node is None:
             return None
-        while v.parent is not None:
-            if v.parent.parent is None:
-                cls._small_rotation(v)
+        while node.parent is not None:
+            if node.parent.parent is None:
+                cls._small_rotation(node)
                 break
-            cls._big_rotation(v)
-        return v
+            cls._big_rotation(node)
+        return node
 
     @classmethod
     def find(cls, root, key):
-        v = root
+        node = root
         last = root
         next_ = None
-        while v is not None:
-            if v.key >= key and (next_ is None or v.key < next_.key):
-                next_ = v
-            last = v
-            if v.key == key:
+        while node is not None:
+            if node.key >= key and (next_ is None or node.key < next_.key):
+                next_ = node
+            last = node
+            if node.key == key:
                 break
-            if v.key < key:
-                v = v.right
+            if node.key < key:
+                node = node.right
             else:
-                v = v.left
+                node = node.left
         root = cls.splay(last)
         return next_, root
 
@@ -141,40 +141,40 @@ class Set:
         middle, right = SplayTree.split(middle, to + 1)
 
         if middle is None:
-            ans = 0
+            result = 0
             self.root = SplayTree.merge(left, right)
         else:
-            ans = middle.sum
+            result = middle.sum
             self.root = SplayTree.merge(SplayTree.merge(left, middle), right)
 
-        return ans
+        return result
 
 
 if __name__ == "__main__":
     n = int(sys.stdin.readline())
 
     last_sum_result = 0
-    MODULO = 1000000001
+    const = 1000000001
 
     s = Set()
     for i in range(n):
         line = sys.stdin.readline().split()
         if line[0] == "+":
             x = int(line[1])
-            s.add((x + last_sum_result) % MODULO)
+            s.add((x + last_sum_result) % const)
         elif line[0] == "-":
             x = int(line[1])
-            s.delete((x + last_sum_result) % MODULO)
+            s.delete((x + last_sum_result) % const)
         elif line[0] == "?":
             x = int(line[1])
             print(
                 "Found" if s.search(
-                    (x + last_sum_result) % MODULO) is not None else "Not found"
+                    (x + last_sum_result) % const) is not None else "Not found"
             )
         elif line[0] == "s":
             l = int(line[1])
             r = int(line[2])
-            res = s.sum((l + last_sum_result) % MODULO,
-                        (r + last_sum_result) % MODULO)
+            res = s.sum((l + last_sum_result) % const,
+                        (r + last_sum_result) % const)
             print(res)
-            last_sum_result = res % MODULO
+            last_sum_result = res % const
